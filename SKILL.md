@@ -37,7 +37,7 @@ Skip and fall back to the brand profile defaults if the referenced path does not
 
 ## Step 1 · Decide the language
 
-**Match the user's language.** Chinese -> `*.html` / `slides-weasy.html`. English -> `*-en.html` / `slides-weasy-en.html`. Japanese -> CJK path (`.html` / `slides-weasy.html`) as best-effort, JP Mincho first, visual QA before shipping. Reference docs are shared English specs.
+**Match the user's language.** Chinese -> `*.html` / `slides-weasy.html`. English -> `*-en.html` / `slides-weasy-en.html`. Japanese -> CJK path (`.html` / `slides-weasy.html`) as best-effort, JP Mincho first, visual QA before shipping. Korean -> dedicated `*-ko.html` / `slides-weasy-ko.html` family as best-effort, visual QA before shipping. Reference docs are shared English specs.
 
 When ambiguous (e.g. a one-word command like "resume"), ask a one-liner rather than guess.
 
@@ -46,6 +46,7 @@ When ambiguous (e.g. a one-word command like "resume"), ask a one-liner rather t
 | Chinese (primary) | `*.html` | `slides-weasy.html` | `slides.py` |
 | English | `*-en.html` | `slides-weasy-en.html` | `slides-en.py` |
 | Japanese (best-effort) | `*.html` | `slides-weasy.html` | `slides.py` |
+| Korean (best-effort) | `*-ko.html` | `slides-weasy-ko.html` | n/a (use `slides-en.py` only if PPTX is required) |
 | Other languages (best-effort) | choose CJK or EN path by script coverage, then verify manually | choose `slides-weasy.html` or `slides-weasy-en.html`, then verify manually | use `slides.py` / `slides-en.py` only if PPTX is required |
 
 > Default to the WeasyPrint HTML path; fall back to PPTX (`slides*.py`) only when the user explicitly needs an editable deck.
