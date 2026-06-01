@@ -11,6 +11,7 @@ import contextlib
 import builtins
 import importlib.util
 import io
+import re
 import sys
 import tempfile
 import zipfile
@@ -171,6 +172,56 @@ def test_chinese_html_templates_keep_single_serif_stack() -> None:
     check("Chinese HTML templates keep --sans: var(--serif)",
           not offenders,
           f"offenders: {', '.join(offenders)}")
+
+
+def _ko_stack_offenders(text: str) -> list[str]:
+    """Return CSS declarations that reference the bare `"Source Han Serif K"`
+    family inside a multi-name fallback stack but omit the real OTF family
+    name `"Source Han Serif KR"`.
+
+    The bare name `"Source Han Serif K"` is legitimate on its own only as the
+    `@font-face` declared alias (a single-name `font-family: "Source Han Serif K";`
+    with no comma, which loads via the file/CDN `src`). Anywhere it appears as a
+    fallback item in a comma-separated stack (`--serif`, `--mono`, `@page`
+    margin boxes, `code`/`pre`, ...), `"Source Han Serif KR"` MUST sit alongside
+    it, or an offline Linux skill install cannot resolve the
+    ensure-fonts.sh-downloaded font by name.
+
+    Detection: scan only `font-family` / `--serif` / `--sans` / `--mono`
+    declaration values (up to the next `;`, never crossing `{`/`}`). The token
+    `"Source Han Serif K"` (closing quote after `K`) never matches
+    `"Source Han Serif KR"`, so a value that contains the bare token AND a comma
+    (i.e. a fallback stack, not a bare `@font-face` alias) must also contain KR.
+    """
+    bare = '"Source Han Serif K"'
+    kr = '"Source Han Serif KR"'
+    decl_re = re.compile(r"(?:font-family|--serif|--sans|--mono)\s*:\s*([^;{}]*)", re.IGNORECASE)
+    offenders: list[str] = []
+    for m in decl_re.finditer(text):
+        value = m.group(1)
+        if bare in value and "," in value and kr not in value:
+            offenders.append(" ".join(value.split()))
+    return offenders
+
+
+def test_korean_templates_carry_resolvable_serif_name() -> None:
+    """Every KO fallback stack that names `Source Han Serif K` must also name
+    `Source Han Serif KR` (the actual family of the bundled OTFs), so the font
+    resolves by name on an offline Linux skill install. Checks per-declaration,
+    not just per-file, so a complete `--serif` cannot mask an incomplete local
+    stack (page-margin header/footer, code/pre, mono).
+    """
+    offenders: list[str] = []
+    ko_sources = [spec.source for name, spec in HTML_TEMPLATES.items() if name.endswith("-ko")]
+    ko_sources += [source for name, source in SCREEN_TEMPLATES.items() if name.endswith("-ko")]
+    for source in ko_sources:
+        text = (TEMPLATES / source).read_text(encoding="utf-8")
+        for bad in _ko_stack_offenders(text):
+            offenders.append(f"{source}: {bad}")
+
+    check("Korean fallback stacks all carry Source Han Serif KR",
+          not offenders,
+          f"offenders: {'; '.join(offenders)}")
 
 
 def test_chinese_slides_mono_has_cjk_fallback() -> None:
@@ -841,6 +892,7 @@ def main() -> int:
     test_dist_package_contents()
     test_registry_consistency()
     test_chinese_html_templates_keep_single_serif_stack()
+    test_korean_templates_carry_resolvable_serif_name()
     test_chinese_slides_mono_has_cjk_fallback()
     test_scan_file_skip_bug()
     test_scan_file_arrow_in_en()

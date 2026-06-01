@@ -1255,7 +1255,7 @@ Canonical values (verified during the `one-pager-ko` pilot, 2026-05-28):
 Fallback chain (consistent across all KO templates):
 
 ```css
---serif: "Source Han Serif K", "Noto Serif KR", "Apple SD Gothic Neo",
+--serif: "Source Han Serif K", "Source Han Serif KR", "Noto Serif KR", "Apple SD Gothic Neo",
          "AppleMyungjo", Charter, Georgia, serif;
 --sans:  var(--serif);
 --mono:  "JetBrains Mono", "D2Coding", "SF Mono", "Fira Code",
@@ -1263,9 +1263,17 @@ Fallback chain (consistent across all KO templates):
 --latin-ui: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 ```
 
-`"Source Han Serif K"` is the Adobe distribution name; `"Noto Serif KR"` is
-the Google Fonts name for the same font. Listing both keeps the chain
-agnostic to which installer the user used.
+`"Source Han Serif K"` is the Adobe distribution name and the `@font-face`
+declared name (so file/CDN loads resolve in a repo checkout or online).
+`"Source Han Serif KR"` is the actual family name baked into the bundled OTFs
+(nameID 1/16 = `Source Han Serif KR`, Korean `본명조 KR`); it MUST stay in the
+chain so that on an offline Linux skill install -- where the relative
+`@font-face` file is stripped and jsDelivr is unreachable -- fontconfig can
+still resolve the `ensure-fonts.sh`-downloaded OTF by name (the bare
+`Source Han Serif K` matches nothing). `"Noto Serif KR"` is the Google Fonts
+name for the same Adobe source, covering boxes that installed it via
+`fonts-noto-cjk`. Listing all three keeps the chain agnostic to which
+installer the user used.
 
 Subsequent KO templates (letter-ko, long-doc-ko, etc.) should adopt the
 font variables and `font-synthesis` rule verbatim and leave all numeric
