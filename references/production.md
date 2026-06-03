@@ -415,6 +415,21 @@ A successful render is not enough. Scan these before delivery:
 
 If any row fails, fix it before delivery.
 
+### Static product site pre-ship review
+
+Run this when the deliverable is a landing page, product site, or hosted showcase rather than a PDF:
+
+| Dimension | Pass standard |
+|---|---|
+| Runtime preview | Serve locally and inspect desktop plus 375px mobile. The first viewport shows the product category, real asset, CTA, and a hint of the next section. |
+| Generated output | If pages come from `template + i18n + content`, run the generator's check mode. It must fail on missing keys and committed output drift. |
+| Public metadata | Canonical, hreflang, `og:locale`, social image, JSON-LD, robots, sitemap, `llms.txt`, and `llms-full.txt` all reflect the shipped locale set. |
+| Copy sync | Product positioning, price, version, install path, support link, FAQ, `llms.txt`, and `llms-full.txt` carry the same factual claims in every locale. |
+| Asset reality | Screenshots are real product surfaces and every image path resolves from the repo or a public URL. No `/Users`, `file://`, or sibling-repo relative paths. |
+| Link surface | Primary CTA, download, releases, docs, help, social links, and internal locale links resolve. Any named release or download artifact exists. |
+
+If the site has only one or two locales, hand-maintained static pages are acceptable. For three or more locales, prefer a generator with a drift check over repeated manual edits.
+
 ---
 
 ## Part 4 · 22 known pitfalls

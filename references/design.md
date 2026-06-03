@@ -17,7 +17,7 @@ This is not a UI framework. It is a constraint system for print, designed to kee
 7. Letter-spacing: Chinese body 0.3pt for comfortable reading; English body 0; tracking only for short labels and overlines
 8. Tag backgrounds must be solid hex, never rgba (WeasyPrint renders a double rectangle)
 9. Depth via ring shadow or whisper shadow, never hard drop shadows
-10. **No italic in print templates**. No `font-style: italic` in any PDF template or demo. Exception: landing page (screen-only) uses italic for poetic lines (gallery captions, feature subtitles, footer ethos) following the Mole pattern
+10. **No italic in print templates**. No `font-style: italic` in any PDF template or demo. Exception: landing page (screen-only) uses italic for poetic lines (gallery captions, feature subtitles, footer ethos)
 
 This system is a fusion of Anthropic's visual language and real Chinese / English resume iteration. Details below.
 
@@ -1093,6 +1093,15 @@ Keep the base and `-en` `.brand-logo` rules identical; the cross-template lint p
 
 The landing-page template is the only kami template designed for browser delivery, not PDF. It inherits the full parchment design system but adds interactive and responsive patterns.
 
+### Product site system
+
+- Use `landing-page*.html` for a single ready-to-serve product page. Keep CSS and JS inline so the file can be copied without a build step.
+- If the deliverable needs docs, help, releases, changelog, roadmap, legal pages, or more than two locales, treat it as a production product site.
+- For a production product site, prefer one structural template, locale string files, and long-content files. The generator must have a check mode that fails on missing keys and generated-output drift.
+- Product positioning must be checked against current product surfaces before rewriting. Stale category language is worse than a missing feature detail.
+- Locale pages, FAQ, JSON-LD, `llms.txt`, `llms-full.txt`, screenshots, install copy, pricing, version, and support links are one public fact set. Keep the factual claims aligned across them.
+- Do not promote project-specific release artifacts, appcast rules, payment providers, or private local paths into the generic template.
+
 ### Layout
 
 - `max-width: 1120px` centered, padding `88px 64px 120px`
@@ -1117,6 +1126,7 @@ The landing-page template is the only kami template designed for browser deliver
 
 - Grid: `minmax(0, 1fr) auto`, frame spans full width, caption and tabs on row 2
 - Frame: dark background `--shot-bg: #141318`, rounded 8px, 1px border
+- Screenshots are final product surfaces first. Use real app/site captures over mockups; if the asset is missing, record a material gap or omit that panel rather than substituting unrelated imagery.
 - Transition: direction-aware slide + scale(0.985), 620-880ms cubic-bezier(0.22, 1, 0.36, 1)
 - Sweep overlay: diagonal light gradient that slides across on switch (540-920ms)
 - Auto-rotate: 4500ms interval, pauses on hover/focus, respects prefers-reduced-motion
@@ -1214,6 +1224,8 @@ The landing-page template alone is one HTML file. To deploy a production multili
 - `landing-page-llms-full.txt.example`: long-form companion AI assistants pull for accurate feature-level answers. Has Overview, Pricing, Features, Comparison, FAQ.
 
 The optional Accept-Language redirect at the end of `landing-page-en.html` is commented out by default. Uncomment only after confirming `/zh/`, `/tw/`, `/ja/`, `/ko/` actually resolve on the host.
+
+When a site uses generated locale pages, add a local drift check next to the generator. It should compare generated HTML to committed output, report missing placeholders by key, and fail before package or release work continues.
 
 ## KO locale tuning
 
